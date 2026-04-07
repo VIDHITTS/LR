@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import altair as alt
 
 st.set_page_config(page_title="Linear Regression Interactive", layout="wide")
 
@@ -53,13 +54,17 @@ mse = np.mean(residuals**2)
 tab1, tab2, tab3, tab4 = st.tabs(["1. Data & Line Fit", "2. Error (MSE)", "3. Loss Surface", "4. Gradient Descent"])
 
 # Combine data for native Streamlit charts
-df_fit = pd.DataFrame({"Actual Data": y, "Linear Fit": y_pred}, index=X)
+df_fit = pd.DataFrame({"X": X, "Actual Data": y, "Linear Fit": y_pred})
 
 with tab1:
     st.header("Data Distribution & Line Fitting")
     st.write("Adjust the slope `m` and intercept `b` in the sidebar to fit the line to the data points. Notice how the line updates in real-time.")
     
-    st.line_chart(df_fit)
+    # Using Altair (built into Streamlit) to show points for data and a line for the fit
+    base = alt.Chart(df_fit).encode(x='X')
+    scatter = base.mark_circle(size=60, color='blue').encode(y='Actual Data', tooltip=['X', 'Actual Data'])
+    line = base.mark_line(color='red', size=3).encode(y='Linear Fit', tooltip=['X', 'Linear Fit'])
+    st.altair_chart(scatter + line, use_container_width=True)
 
 with tab2:
     st.header("Error / Loss Function (MSE)")
